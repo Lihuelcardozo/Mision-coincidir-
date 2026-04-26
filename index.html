@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Misión Coincidir 🚀</title>
+<style>
+  body { margin:0; background:black; color:#00ffcc; font-family: 'Courier New', Courier, monospace; overflow: hidden; }
+  #game { width:90%; max-width:500px; margin:8vh auto 0; padding:20px; border:1px solid #00ffcc; box-shadow: 0 0 20px rgba(0, 255, 204, 0.2); }
+  .text { height:240px; overflow-y:auto; white-space:pre-line; line-height: 1.5; }
+  #options { width:90%; max-width:500px; margin:10px auto; }
+  .option, .startBtn { border:1px solid #00ffcc; padding:12px; margin:8px 0; text-align:center; cursor:pointer; transition: 0.3s; }
+  .option:hover, .startBtn:hover { background: #00ffcc; color: black; font-weight: bold; }
+  input { width:100%; padding:10px; margin-top:15px; background:black; color:#00ffcc; border:1px solid #00ffcc; box-sizing: border-box; text-align: center; }
+  #callScreen { display:none; position:fixed; inset:0; background:black; z-index:10; justify-content:center; align-items:center; flex-direction:column; }
+  video { width: 85%; height: auto; max-height: 70vh; border: 2px solid #00ffcc; background: #000; }
+</style>
+</head>
+<body>
+<div id="game"><div id="text" class="text"></div></div>
+<div id="options"></div>
+
+<div id="callScreen">
+  <video id="videoLocal" playsinline muted controls></video>
+  <div class="option" style="margin-top:15px; width:80%;" onclick="closeCall()">Finalizar Transmisión</div>
+</div>
+
+<script>
+let name=""; let current=""; let isTyping=false; let stats={ intuicion:0, protocolo:0, vioVideo:0 };
+
+function typeText(text, cb){
+  const el = document.getElementById("text"); el.innerHTML=""; let i=0; isTyping=true;
+  function t(){
+    if(i<text.length){ el.innerHTML += text[i]==="\n"?"<br>":text[i]; el.scrollTop = el.scrollHeight; i++; setTimeout(t,20); }
+    else{ isTyping=false; if(cb) cb(); }
+  } t();
+}
+
+function startScreen(){
+  document.getElementById("text").innerHTML=`MISIÓN: COINCIDIR 🚀\n-------------------\nESTADO: BUSCANDO CAPITANA...\n\nIngresá tu nombre para iniciar:\n<input id="nameInput" placeholder="Ej. Mabel">`;
+  document.getElementById("options").innerHTML=`<div class="startBtn" id="startBtn">▶️ Iniciar Misión</div>`;
+  setTimeout(()=>{
+    const btn=document.getElementById("startBtn"); if(btn) btn.onclick=startGame;
+    const input=document.getElementById("nameInput"); if(input) input.addEventListener("keydown",e=>{ if(e.key==="Enter") startGame(); });
+  },100);
+}
+
+function startGame(){
+  const input=document.getElementById("nameInput"); name = (input && input.value.trim()) ? input.value : "Capitana";
+  stats={ intuicion:0, protocolo:0, vioVideo:0 }; current="inicio"; render();
+}
+
+function openCall(){
+  stats.vioVideo = 1;
+  const v = document.getElementById("videoLocal");
+  const container = document.getElementById("callScreen");
+  v.src = "Paramicapitana.mp4"; 
+  container.style.display = "flex";
+  v.play();
+}
+
+function closeCall(){
+  const v = document.getElementById("videoLocal");
+  v.pause();
+  document.getElementById("callScreen").style.display = "none";
+  current = "final"; render();
+}
+
+const story = {
+  inicio: { 
+    text: () => `BITÁCORA ESTELAR: SECTOR DESCONOCIDO\n\nCapitana ${name}, la nave ha quedado a la deriva tras un fallo crítico. Los geles bio-neuronales están al límite y el replicador de café ha quedado fuera de servicio.\n\nFrente a nosotros, una masa de energía no identificada bloquea el cuadrante. Los sensores no logran leer a través de ella. ¿Qué hacemos?`, 
+    options: [
+      { t: "🌌 Realizar escaneo multiespectral", n: "e2", s: { intuicion: 1 } }, 
+      { t: "🚀 Fortalecer Escudos (Alerta Roja)", n: "t2", s: { protocolo: 1 } }
+    ] 
+  },
+  e2: { text: `Tus lecturas confirman que se trata de una NEBULOSA de gases ionizados. \n\nAl entrar en ella, los geles bio-neuronales reaccionan. Hay una consciencia ahí dentro que parece atraída por nuestra presencia.`, options: [{ t: "📡 Emitir pulso de saludo", n: "e3", s: { intuicion: 1 } }] },
+  e3: { text: `La nebulosa brilla con una luz cálida. La entidad que habita el gas está estabilizando un agujero de gusano para nosotros.\n\nPara cruzar este umbral, debemos bajar las defensas y confiar.`, options: [{ t: "🫶 Bajar escudos y confiar", n: "e4", s: { intuicion: 1 } }] },
+  e4: { text: `Estamos en el corazón de la nebulosa. La armonía entre la nave y la entidad es perfecta. El canal visual está listo para activarse.\n\n¿Aceptamos el contacto, Capitana?`, options: [
+      { t: "📞 Aceptar transmisión", action: "call" }, 
+      { t: "⚠️ Mantener precaución", n: "insistir" }
+    ] 
+  },
+  t2: { text: `La nebulosa es hostil. El plasma daña el casco externo. La integridad cae al 60%. Si no forzamos la salida, nos quedaremos aquí para siempre.`, options: [{ t: "🧠 Calcular ráfaga de taquiones", n: "t3", s: { protocolo: 1 } }] },
+  t3: { text: `Abrimos una brecha en la nebulosa. Una silueta de energía se materializa ante la potencia de nuestro disparo. Está esperando ver nuestro siguiente movimiento.`, options: [{ t: "⚠️ Mantener Alerta Roja", n: "t4", s: { protocolo: 1 } }] },
+  t4: { text: `La brecha es estable. La Voyager ha demostrado su fuerza. La entidad de la nebulosa cede y ofrece un canal directo antes de dejarnos pasar.`, options: [
+      { t: "📞 Aceptar contacto", action: "call" }, 
+      { t: "⚠️ Denegar por seguridad", n: "insistir" }
+    ] 
+  },
+  insistir: {
+    text: `Capitana, la señal persiste. No parece una amenaza, sino un mensaje personal encriptado en una frecuencia que solo vos podés abrir.\n\n¿Segura que desea ignorar la transmisión?`,
+    options: [
+      { t: "📞 Aceptar contacto ahora", action: "call" },
+      { t: "🚫 Confirmar cierre de canal", n: "final", s: { vioVideo: 0 } }
+    ]
+  },
+  final: { text: () => stats.vioVideo === 1 ? `BITÁCORA FINAL: NEBULOSA CRUZADA\n\nCapitana ${name}, no solo encontramos el camino, sino que demostraste que tenés el instinto de una verdadera oficial de mando. \n\nMe gusta esa forma que tenés de bajar los escudos y mandarte adelante incluso cuando no hay mapas. Seis meses en este viaje y cada vez está más claro: sos un gran hallazgo en este cuadrante.\n\nQué placer coincidir. Larga vida y prosperidad 🖖💛` : `BITÁCORA FINAL: MISIÓN CUMPLIDA\n\nCapitana ${name}, cruzamos la nebulosa a salvo gracias a tu rigor táctico. Fuiste lógica y precisa hasta el último segundo.\n\nEn estos primeros seis meses de misión, ya demostraste que sabés cómo cuidar lo importante. Me gusta cómo sos: decidida y siempre atenta a los detalles.\n\nQué placer coincidir en esta línea temporal. ¡Adelante! 🚀💛`, options: [], end: true }
+};
+
+function render(){
+  const scene = story[current]; if(!scene){ startScreen(); return; }
+  const optDiv = document.getElementById("options"); optDiv.innerHTML="";
+  typeText(typeof scene.text==="function"?scene.text():scene.text,()=>{
+    if(scene.end){ optDiv.innerHTML=`<div class="option" onclick="startScreen()">🔁 Reiniciar Simulación</div>`; return; }
+    scene.options.forEach(o=>{
+      const b=document.createElement("div"); b.className="option"; b.innerText=o.t;
+      b.onclick=()=>{ if(isTyping) return; if(o.s){ Object.keys(o.s).forEach(k=>stats[k]+=o.s[k]); } if(o.action==="call"){ openCall(); return; } current=o.n; render(); };
+      optDiv.appendChild(b);
+    });
+  });
+}
+startScreen();
+</script>
+</body>
+</html>
